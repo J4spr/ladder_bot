@@ -1,0 +1,20 @@
+{
+	"name": "fomranking",
+	"version": "1.0.0",
+	"description": "A bot that allows people to fight eachother in a bunch of games",
+	"type": "commonjs",
+	"main": "main.js",
+	"scripts": {
+		"start": "cls && node main.js",
+		"dev": "cls && docker compose up -d --build",
+		"stop": "docker compose down"
+	},
+	"dependencies": {
+		"discord.js": "^14.27.0",
+		"pg": "^8.22.0"
+	},
+	"devDependencies": {
+		"@eslint/js": "^10.0.1",
+		"eslint": "^10.7.0"
+	}
+}

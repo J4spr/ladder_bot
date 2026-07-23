@@ -7,7 +7,8 @@
 	"scripts": {
 		"start": "cls && node main.js",
 		"dev": "cls && docker compose up --build",
-		"stop": "docker compose down -v"
+		"stop": "docker compose down -v",
+		"lint": "eslint ."
 	},
 	"dependencies": {
 		"discord.js": "^14.27.0",

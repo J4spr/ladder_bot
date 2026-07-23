@@ -45,7 +45,6 @@ module.exports = {
 			interaction.options.getInteger("challengecount") ?? 3;
 
 		try {
-			// Insert and return the new auto-incremented ladder_id
 			const result = await db.query(
 				"INSERT INTO ladders (ladder_name, ladder_count, challenge_count) VALUES ($1, $2, $3) RETURNING ladder_id",
 				[ladder_name, ladder_count, challenge_count],

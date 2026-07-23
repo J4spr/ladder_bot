@@ -12,16 +12,23 @@ services:
             - "5432:5432"
         volumes:
             - postgres_data:/var/lib/postgresql/data
-            # Mount DB logs to local ./logs/postgres folder
             - ./logs/postgres:/var/log/postgresql
+        # Healthcheck to verify Postgres is ready for queries
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U postgres -d fom"]
+            interval: 3s
+            timeout: 5s
+            retries: 10
 
     # 2. Your Discord Bot Service
     bot:
         build: .
         container_name: fom_discord_bot
         restart: always
+        # Wait until 'db' passes its healthcheck before starting
         depends_on:
-            - db
+            db:
+                condition: service_healthy
         environment:
             - DB_HOST=db
             - DB_USER=postgres
@@ -29,7 +36,6 @@ services:
             - DB_NAME=fom
             - DB_PORT=5432
         volumes:
-            # Mount bot logs to local ./logs/bot folder
             - ./logs/bot:/usr/src/app/logs
 
 volumes:

@@ -12,6 +12,8 @@ services:
             - "5432:5432"
         volumes:
             - postgres_data:/var/lib/postgresql/data
+            # Mount DB logs to local ./logs/postgres folder
+            - ./logs/postgres:/var/log/postgresql
 
     # 2. Your Discord Bot Service
     bot:
@@ -26,6 +28,9 @@ services:
             - DB_PASSWORD=Multiwan
             - DB_NAME=fom
             - DB_PORT=5432
+        volumes:
+            # Mount bot logs to local ./logs/bot folder
+            - ./logs/bot:/usr/src/app/logs
 
 volumes:
     postgres_data:

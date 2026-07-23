@@ -10,6 +10,35 @@ const {
 } = require("discord.js");
 const { token, clientId, guildId } = require("./config.json");
 
+// Ensure the logs directory exists
+const logDir = path.join(__dirname, "logs");
+if (!fs.existsSync(logDir)) {
+	fs.mkdirSync(logDir, { recursive: true });
+}
+
+// Write console.log and console.error output directly to log files
+const logStream = fs.createWriteStream(path.join(logDir, "bot.log"), {
+	flags: "a",
+});
+const errorStream = fs.createWriteStream(path.join(logDir, "error.log"), {
+	flags: "a",
+});
+
+const originalLog = console.log;
+const originalError = console.error;
+
+console.log = function (...args) {
+	const message = `[${new Date().toISOString()}] INFO: ${args.join(" ")}\n`;
+	logStream.write(message);
+	originalLog.apply(console, args);
+};
+
+console.error = function (...args) {
+	const message = `[${new Date().toISOString()}] ERROR: ${args.join(" ")}\n`;
+	errorStream.write(message);
+	originalError.apply(console, args);
+};
+
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
 // 1. Setup Collection for slash commands

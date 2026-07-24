@@ -21,7 +21,7 @@ module.exports = {
 			interaction.user.globalName || interaction.user.username;
 
 		try {
-			// 1. Fetch ladder info
+			// Fetch ladder info
 			const ladderRes = await db.query(
 				'SELECT ladder_id, ladder_count FROM ladders WHERE ladder_name = $1 AND is_active = TRUE',
 				[ladder_name],
@@ -35,16 +35,16 @@ module.exports = {
 
 			const { ladder_id, ladder_count } = ladderRes.rows[0];
 
-			// 2. Ensure user entry exists in users table using their Discord name
+			// Ensure user entry exists using `nickname` column
 			await db.query(
-				`INSERT INTO users (discord_id, ign, ladder_id)
+				`INSERT INTO users (discord_id, nickname, ladder_id)
 				 VALUES ($1, $2, $3)
 				 ON CONFLICT (discord_id) 
-				 DO UPDATE SET ign = EXCLUDED.ign, ladder_id = EXCLUDED.ladder_id`,
+				 DO UPDATE SET nickname = EXCLUDED.nickname, ladder_id = EXCLUDED.ladder_id`,
 				[discord_id, username, ladder_id],
 			);
 
-			// 3. Count current active members in ladder
+			// Count current active members in ladder
 			const countRes = await db.query(
 				'SELECT COUNT(*) FROM ladder_members WHERE ladder_id = $1 AND is_active = TRUE',
 				[ladder_id],
@@ -59,7 +59,7 @@ module.exports = {
 
 			const nextPosition = currentMemberCount + 1;
 
-			// 4. Insert or Reactivate member in ladder_members
+			// Insert or Reactivate member in ladder_members
 			await db.query(
 				`INSERT INTO ladder_members (ladder_id, discord_id, position, is_active)
 				 VALUES ($1, $2, $3, TRUE)

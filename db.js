@@ -25,7 +25,7 @@ const initDb = async (retries = 5, delay = 3000) => {
         CREATE TABLE IF NOT EXISTS users (
           player_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
           discord_id VARCHAR(32) UNIQUE NOT NULL,
-          ign VARCHAR(100) NOT NULL,
+          nickname VARCHAR(100) NOT NULL,
           ladder_id INT REFERENCES ladders(ladder_id) ON DELETE SET NULL
         );
 

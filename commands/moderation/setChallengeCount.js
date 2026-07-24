@@ -38,7 +38,7 @@ module.exports = {
 			interaction.options.getInteger('challenge_count');
 
 		try {
-			const result = await db.query(
+			await db.query(
 				'UPDATE ladders SET challenge_count = $1 WHERE ladder_name = $2',
 				[challenge_count, ladder_name],
 			);

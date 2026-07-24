@@ -2,6 +2,7 @@
 node_modules/
 /.pnp
 .pnp.js
+*-lock.*
 
 # Environment and sensitive configuration
 config.json

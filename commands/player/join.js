@@ -1,21 +1,21 @@
-const { SlashCommandBuilder } = require("discord.js");
-const db = require("../../db.js");
+const { SlashCommandBuilder } = require('discord.js');
+const db = require('../../db.js');
 
 module.exports = {
 	data: new SlashCommandBuilder()
-		.setName("join")
-		.setDescription("Join a ladder as a new player")
+		.setName('join')
+		.setDescription('Join a ladder as a new player')
 		.addStringOption((option) =>
 			option
-				.setName("ladder_name")
-				.setDescription("Enter the ladder name here")
+				.setName('ladder_name')
+				.setDescription('Enter the ladder name here')
 				.setRequired(true),
 		),
 
 	async execute(interaction) {
 		await interaction.deferReply();
 
-		const ladder_name = interaction.options.getString("ladder_name");
+		const ladder_name = interaction.options.getString('ladder_name');
 		const discord_id = interaction.user.id;
 		const username =
 			interaction.user.globalName || interaction.user.username;
@@ -23,7 +23,7 @@ module.exports = {
 		try {
 			// 1. Fetch ladder info
 			const ladderRes = await db.query(
-				"SELECT ladder_id, ladder_count FROM ladders WHERE ladder_name = $1 AND is_active = TRUE",
+				'SELECT ladder_id, ladder_count FROM ladders WHERE ladder_name = $1 AND is_active = TRUE',
 				[ladder_name],
 			);
 
@@ -46,7 +46,7 @@ module.exports = {
 
 			// 3. Count current active members in ladder
 			const countRes = await db.query(
-				"SELECT COUNT(*) FROM ladder_members WHERE ladder_id = $1 AND is_active = TRUE",
+				'SELECT COUNT(*) FROM ladder_members WHERE ladder_id = $1 AND is_active = TRUE',
 				[ladder_id],
 			);
 			const currentMemberCount = parseInt(countRes.rows[0].count, 10);
@@ -71,11 +71,12 @@ module.exports = {
 			await interaction.editReply({
 				content: `✅ You joined **${ladder_name}** at spot **#${nextPosition}**!`,
 			});
-		} catch (error) {
-			console.error("Error running /join:", error);
+		}
+		catch (error) {
+			console.error('Error running /join:', error);
 			await interaction.editReply({
 				content:
-					"❌ An error occurred while attempting to join the ladder.",
+					'❌ An error occurred while attempting to join the ladder.',
 			});
 		}
 	},

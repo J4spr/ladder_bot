@@ -1,11 +1,11 @@
 // db.js
-const { Pool } = require("pg");
+const { Pool } = require('pg');
 
 const pool = new Pool({
-	user: process.env.DB_USER || "postgres",
-	host: process.env.DB_HOST || "localhost",
-	database: process.env.DB_NAME || "fom",
-	password: process.env.DB_PASSWORD || "Multiwan",
+	user: process.env.DB_USER || 'postgres',
+	host: process.env.DB_HOST || 'localhost',
+	database: process.env.DB_NAME || 'fom',
+	password: process.env.DB_PASSWORD || 'Multiwan',
 	port: process.env.DB_PORT || 5432,
 });
 
@@ -47,16 +47,18 @@ const initDb = async (retries = 5, delay = 3000) => {
           PRIMARY KEY (ladder_id, challenger_id)
         );
       `);
-			console.log("✅ Database tables initialized successfully.");
+			console.log('✅ Database tables initialized successfully.');
 			return;
-		} catch (error) {
+		}
+		catch (error) {
 			retries--;
 			console.error(
 				`⚠️ DB not ready, retrying in ${delay / 1000}s... (${retries} attempts left)`,
 			);
 			if (retries === 0) {
-				console.error("❌ Error initializing database tables:", error);
-			} else {
+				console.error('❌ Error initializing database tables:', error);
+			}
+			else {
 				await new Promise((res) => setTimeout(res, delay));
 			}
 		}

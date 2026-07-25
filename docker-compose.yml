@@ -1,42 +1,54 @@
+version: "3.8"
+
 services:
-    # 1. PostgreSQL Database Service
-    db:
+    postgres:
         image: postgres:16-alpine
         container_name: fom_postgres
-        restart: always
+        restart: unless-stopped
         environment:
-            POSTGRES_USER: postgres
-            POSTGRES_PASSWORD: Multiwan
-            POSTGRES_DB: fom
-        ports:
-            - "5432:5432"
+            POSTGRES_DB: ${DB_NAME:-fom}
+            POSTGRES_USER: ${DB_USER:-postgres}
+            POSTGRES_PASSWORD: ${DB_PASSWORD}
         volumes:
             - postgres_data:/var/lib/postgresql/data
-            - ./logs/postgres:/var/log/postgresql
-        # Healthcheck to verify Postgres is ready for queries
         healthcheck:
-            test: ["CMD-SHELL", "pg_isready -U postgres -d fom"]
-            interval: 3s
+            test:
+                [
+                    "CMD-SHELL",
+                    "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-fom}",
+                ]
+            interval: 10s
             timeout: 5s
-            retries: 10
+            retries: 5
+        networks:
+            - fom_network
 
-    # 2. Your Discord Bot Service
     bot:
         build: .
         container_name: fom_discord_bot
-        restart: always
-        # Wait until 'db' passes its healthcheck before starting
+        restart: unless-stopped
         depends_on:
-            db:
+            postgres:
                 condition: service_healthy
         environment:
-            - DB_HOST=db
-            - DB_USER=postgres
-            - DB_PASSWORD=Multiwan
-            - DB_NAME=fom
-            - DB_PORT=5432
+            NODE_ENV: production
+            DB_HOST: postgres
+            DB_PORT: 5432
+            DB_NAME: ${DB_NAME:-fom}
+            DB_USER: ${DB_USER:-postgres}
+            DB_PASSWORD: ${DB_PASSWORD}
+            DISCORD_TOKEN: ${DISCORD_TOKEN}
+            CLIENT_ID: ${CLIENT_ID}
+            GUILD_ID: ${GUILD_ID}
         volumes:
-            - ./logs/bot:/usr/src/app/logs
+            - bot_logs:/usr/src/app/logs
+        networks:
+            - fom_network
+
+networks:
+    fom_network:
+        driver: bridge
 
 volumes:
     postgres_data:
+    bot_logs:

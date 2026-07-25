@@ -1,18 +1,21 @@
-# Use the official Node.js 20 LTS lightweight image
-FROM node:20-alpine
+FROM node:24-alpine AS base
 
-# Set the working directory inside the container
+# Create app directory
 WORKDIR /usr/src/app
 
-# Copy package.json and package-lock.json first to leverage Docker layer caching
+# Copy package files first to leverage Docker layer caching
 COPY package*.json ./
 
-# Install project dependencies
-# RUN npm ci --only=production
-RUN npm ci
+# Install production dependencies only
+RUN npm ci --only=production
 
-# Copy the rest of your application code
+# Copy application code
 COPY . .
 
-# Start the bot
+# Set environment to production
+ENV NODE_ENV=production
+
+# Use non-root node user for container security
+USER node
+
 CMD ["node", "main.js"]

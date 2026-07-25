@@ -74,7 +74,7 @@ module.exports = {
 			// 4. Listen for button press
 			const collector = response.createMessageComponentCollector({
 				componentType: ComponentType.Button,
-				time: 300_000, // 5 minutes
+				time: 300_000,
 			});
 
 			collector.on("collect", async (btnInteraction) => {

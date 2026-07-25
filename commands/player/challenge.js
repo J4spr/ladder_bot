@@ -129,7 +129,7 @@ module.exports = {
 			// 8. Create a collector for button clicks (active for 5 minutes)
 			const collector = response.createMessageComponentCollector({
 				componentType: ComponentType.Button,
-				time: 300_000, // 5 minutes
+				time: 300_000,
 			});
 
 			collector.on("collect", async (btnInteraction) => {

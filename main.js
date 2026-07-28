@@ -12,34 +12,34 @@ const token = process.env.DISCORD_TOKEN;
 const clientId = process.env.CLIENT_ID;
 const guildId = process.env.GUILD_ID;
 
-// Ensure the logs directory exists
-const logDir = path.join(__dirname, "logs");
-if (!fs.existsSync(logDir)) {
-	fs.mkdirSync(logDir, { recursive: true });
-}
+// // Ensure the logs directory exists
+// const logDir = path.join(__dirname, "logs");
+// if (!fs.existsSync(logDir)) {
+// 	fs.mkdirSync(logDir, { recursive: true });
+// }
 
-// Write console.log and console.error output directly to log files
-const logStream = fs.createWriteStream(path.join(logDir, "bot.log"), {
-	flags: "a",
-});
-const errorStream = fs.createWriteStream(path.join(logDir, "error.log"), {
-	flags: "a",
-});
+// // Write console.log and console.error output directly to log files
+// const logStream = fs.createWriteStream(path.join(logDir, "bot.log"), {
+// 	flags: "a",
+// });
+// const errorStream = fs.createWriteStream(path.join(logDir, "error.log"), {
+// 	flags: "a",
+// });
 
-const originalLog = console.log;
-const originalError = console.error;
+// const originalLog = console.log;
+// const originalError = console.error;
 
-console.log = function (...args) {
-	const message = `[${new Date().toISOString()}] INFO: ${args.join(" ")}\n`;
-	logStream.write(message);
-	originalLog.apply(console, args);
-};
+// console.log = function (...args) {
+// 	const message = `[${new Date().toISOString()}] INFO: ${args.join(" ")}\n`;
+// 	logStream.write(message);
+// 	originalLog.apply(console, args);
+// };
 
-console.error = function (...args) {
-	const message = `[${new Date().toISOString()}] ERROR: ${args.join(" ")}\n`;
-	errorStream.write(message);
-	originalError.apply(console, args);
-};
+// console.error = function (...args) {
+// 	const message = `[${new Date().toISOString()}] ERROR: ${args.join(" ")}\n`;
+// 	errorStream.write(message);
+// 	originalError.apply(console, args);
+// };
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 

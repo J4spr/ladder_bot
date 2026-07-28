@@ -40,6 +40,7 @@ services:
             GUILD_ID: ${GUILD_ID}
         volumes:
             - bot_logs:/usr/src/app/logs
+            - ./config.json:/usr/src/app/config.json:ro
         # 2. Tell Watchtower to explicitly monitor this container
         labels:
             - "com.centurylinklabs.watchtower.enable=true"

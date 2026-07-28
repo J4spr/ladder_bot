@@ -22,8 +22,7 @@ services:
             - fom_network
 
     bot:
-        # 1. Swapped `build: .` for your remote image URL so Watchtower can pull updates
-        image: docker pull ghcr.io/j4spr/ladder_bot:sha256-9be9f3c50065e0f81a8bcfbe937a8088eb7180b9246040a2dffe5b2ef1dfbabe.sig
+        image: ghcr.io/j4spr/ladder_bot:latest
         container_name: fom_discord_bot
         restart: unless-stopped
         depends_on:

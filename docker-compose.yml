@@ -57,6 +57,7 @@ services:
             - WATCHTOWER_CLEANUP=true # Deletes old image layers after updating
             - WATCHTOWER_POLL_INTERVAL=300 # Checks for image updates every 5 minutes (300s)
             - WATCHTOWER_LABEL_ENABLE=true # ONLY updates containers with the watchtower label
+            - DOCKER_API_VERSION=1.40
 
             # UNCOMMENT if your GHCR repository is PRIVATE:
             # - REPO_USER=j4spr

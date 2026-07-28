@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
     postgres:
         image: postgres:16-alpine
@@ -24,7 +22,8 @@ services:
             - fom_network
 
     bot:
-        build: .
+        # 1. Swapped `build: .` for your remote image URL so Watchtower can pull updates
+        image: ghcr.io/j4spr/ladder_bot:latest
         container_name: fom_discord_bot
         restart: unless-stopped
         depends_on:
@@ -42,6 +41,27 @@ services:
             GUILD_ID: ${GUILD_ID}
         volumes:
             - bot_logs:/usr/src/app/logs
+        # 2. Tell Watchtower to explicitly monitor this container
+        labels:
+            - "com.centurylinklabs.watchtower.enable=true"
+        networks:
+            - fom_network
+
+    watchtower:
+        image: containrrr/watchtower:latest
+        container_name: fom_watchtower
+        restart: unless-stopped
+        volumes:
+            # Allows Watchtower to monitor host containers and restart them
+            - /var/run/docker.sock:/var/run/docker.sock
+        environment:
+            - WATCHTOWER_CLEANUP=true # Deletes old image layers after updating
+            - WATCHTOWER_POLL_INTERVAL=300 # Checks for image updates every 5 minutes (300s)
+            - WATCHTOWER_LABEL_ENABLE=true # ONLY updates containers with the watchtower label
+
+            # UNCOMMENT if your GHCR repository is PRIVATE:
+            # - REPO_USER=j4spr
+            # - REPO_PASS=${GHCR_PAT}              # GitHub Personal Access Token with 'read:packages' scope
         networks:
             - fom_network
 

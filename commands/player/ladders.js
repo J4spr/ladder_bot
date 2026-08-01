@@ -16,7 +16,7 @@ module.exports = {
 					l.laddername, 
 					l.laddercount, 
 					l.challengecount,
-					COUNT(lm.discordid) FILTER (WHERE lm.isactive = TRUE) AS active_players
+					COUNT(lm.discordid) FILTER (WHERE lm.isactive = TRUE) AS activeplayers
 				 FROM ladders l
 				 LEFT JOIN laddermembers lm ON l.ladderid = lm.ladderid
 				 WHERE l.isactive = TRUE

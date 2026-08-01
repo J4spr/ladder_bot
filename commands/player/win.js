@@ -27,7 +27,7 @@ module.exports = {
 		try {
 			// 1. Fetch ladder ID
 			const ladderRes = await db.query(
-				"SELECT ladder_id FROM ladders WHERE ladder_name = $1 AND is_active = TRUE",
+				"SELECT ladderid FROM ladders WHERE laddername = $1 AND isactive = TRUE",
 				[ladderName],
 			);
 
@@ -37,13 +37,13 @@ module.exports = {
 				});
 			}
 
-			const ladderId = ladderRes.rows[0].ladder_id;
+			const ladderId = ladderRes.rows[0].ladderid;
 
 			// 2. Find an accepted active match involving this player
 			const matchRes = await db.query(
-				`SELECT challenger_id, defender_id 
-				 FROM active_challenges 
-				 WHERE ladder_id = $1 AND status = 'accepted' AND (challenger_id = $2 OR defender_id = $2)`,
+				`SELECT challengerid, defenderid 
+				 FROM activechallenges 
+				 WHERE ladderid = $1 AND status = 'accepted' AND (challengerid = $2 OR defenderid = $2)`,
 				[ladderId, winnerId],
 			);
 
@@ -53,7 +53,7 @@ module.exports = {
 				});
 			}
 
-			const { challenger_id: challengerId, defender_id: defenderId } =
+			const { challengerid: challengerId, defenderid: defenderId } =
 				matchRes.rows[0];
 			const loserId =
 				winnerId === challengerId ? defenderId : challengerId;
@@ -92,11 +92,11 @@ module.exports = {
 				if (btnInteraction.customId === "btn_confirm_win") {
 					// Fetch current positions
 					const winnerMem = await db.query(
-						"SELECT position FROM ladder_members WHERE ladder_id = $1 AND discord_id = $2",
+						"SELECT position FROM laddermembers WHERE ladderid = $1 AND discordid = $2",
 						[ladderId, winnerId],
 					);
 					const loserMem = await db.query(
-						"SELECT position FROM ladder_members WHERE ladder_id = $1 AND discord_id = $2",
+						"SELECT position FROM laddermembers WHERE ladderid = $1 AND discordid = $2",
 						[ladderId, loserId],
 					);
 
@@ -106,18 +106,18 @@ module.exports = {
 					// Swap positions if lower rank beat higher rank
 					if (winnerPos > loserPos) {
 						await db.query(
-							"UPDATE ladder_members SET position = $1 WHERE ladder_id = $2 AND discord_id = $3",
+							"UPDATE laddermembers SET position = $1 WHERE ladderid = $2 AND discordid = $3",
 							[loserPos, ladderId, winnerId],
 						);
 						await db.query(
-							"UPDATE ladder_members SET position = $1 WHERE ladder_id = $2 AND discord_id = $3",
+							"UPDATE laddermembers SET position = $1 WHERE ladderid = $2 AND discordid = $3",
 							[winnerPos, ladderId, loserId],
 						);
 					}
 
 					// Clean up the active challenge
 					await db.query(
-						"DELETE FROM active_challenges WHERE ladder_id = $1 AND challenger_id = $2 AND defender_id = $3",
+						"DELETE FROM activechallenges WHERE ladderid = $1 AND challengerid = $2 AND defenderid = $3",
 						[ladderId, challengerId, defenderId],
 					);
 

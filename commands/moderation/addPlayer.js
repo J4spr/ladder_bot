@@ -39,7 +39,7 @@ module.exports = {
 		try {
 			// 1. Fetch ladder info
 			const ladderRes = await db.query(
-				"SELECT ladder_id, ladder_count FROM ladders WHERE ladder_name = $1 AND is_active = TRUE",
+				"SELECT ladderid, laddercount FROM ladders WHERE laddername = $1 AND isactive = TRUE",
 				[ladderName],
 			);
 
@@ -49,25 +49,24 @@ module.exports = {
 				});
 			}
 
-			const { ladder_id: ladderId, ladder_count: maxCapacity } =
+			const { ladderid: ladderId, laddercount: maxCapacity } =
 				ladderRes.rows[0];
 
-			// Fetch Discord nickname/display name, fallback to username
 			const nickname = targetUser.globalName || targetUser.username;
 
-			// 2. Upsert into users table (includes nickname to satisfy NOT NULL)
+			// 2. Upsert into users table
 			await db.query(
-				`INSERT INTO users (discord_id, nickname, ladder_id)
+				`INSERT INTO users (discordid, nickname, ladderid)
 				 VALUES ($1, $2, $3)
-				 ON CONFLICT (discord_id) 
+				 ON CONFLICT (discordid) 
 				 DO UPDATE SET 
 					nickname = EXCLUDED.nickname,
-					ladder_id = EXCLUDED.ladder_id`,
+					ladderid = EXCLUDED.ladderid`,
 				[targetUser.id, nickname, ladderId],
 			);
 
 			const activeCountRes = await db.query(
-				"SELECT COUNT(*) FROM ladder_members WHERE ladder_id = $1 AND is_active = TRUE",
+				"SELECT COUNT(*) FROM laddermembers WHERE ladderid = $1 AND isactive = TRUE",
 				[ladderId],
 			);
 			const currentCount = parseInt(activeCountRes.rows[0].count, 10);
@@ -81,26 +80,26 @@ module.exports = {
 			const nextPosition = currentCount + 1;
 
 			const memberCheck = await db.query(
-				"SELECT is_active FROM ladder_members WHERE ladder_id = $1 AND discord_id = $2",
+				"SELECT isactive FROM laddermembers WHERE ladderid = $1 AND discordid = $2",
 				[ladderId, targetUser.id],
 			);
 
 			if (memberCheck.rows.length > 0) {
-				if (memberCheck.rows[0].is_active) {
+				if (memberCheck.rows[0].isactive) {
 					return interaction.editReply({
 						content: `❌ <@${targetUser.id}> is already in **${ladderName}**!`,
 					});
 				} else {
 					await db.query(
-						`UPDATE ladder_members 
-						 SET is_active = TRUE, position = $1, joined_at = CURRENT_TIMESTAMP 
-						 WHERE ladder_id = $2 AND discord_id = $3`,
+						`UPDATE laddermembers 
+						 SET isactive = TRUE, position = $1, joinedat = CURRENT_TIMESTAMP 
+						 WHERE ladderid = $2 AND discordid = $3`,
 						[nextPosition, ladderId, targetUser.id],
 					);
 				}
 			} else {
 				await db.query(
-					`INSERT INTO ladder_members (ladder_id, discord_id, position, is_active)
+					`INSERT INTO laddermembers (ladderid, discordid, position, isactive)
 					 VALUES ($1, $2, $3, TRUE)`,
 					[ladderId, targetUser.id, nextPosition],
 				);

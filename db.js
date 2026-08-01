@@ -14,37 +14,37 @@ const initDb = async (retries = 5, delay = 3000) => {
 		try {
 			await pool.query(`
         CREATE TABLE IF NOT EXISTS ladders (
-          ladder_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-          ladder_name VARCHAR(100) NOT NULL,
-          ladder_count INT DEFAULT 20,
-          challenge_count INT DEFAULT 3,
-          is_active BOOLEAN DEFAULT TRUE,
-          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          ladderid INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+          laddername VARCHAR(100) NOT NULL,
+          laddercount INT DEFAULT 20,
+          challengecount INT DEFAULT 3,
+          isactive BOOLEAN DEFAULT TRUE,
+          createdat TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
 
         CREATE TABLE IF NOT EXISTS users (
-          player_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-          discord_id VARCHAR(32) UNIQUE NOT NULL,
+          playerid INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+          discordid VARCHAR(32) UNIQUE NOT NULL,
           nickname VARCHAR(100) NOT NULL,
-          ladder_id INT REFERENCES ladders(ladder_id) ON DELETE SET NULL
+          ladderid INT REFERENCES ladders(ladderid) ON DELETE SET NULL
         );
 
-        CREATE TABLE IF NOT EXISTS ladder_members (
-          ladder_id INT REFERENCES ladders(ladder_id) ON DELETE CASCADE,
-          discord_id VARCHAR(32) REFERENCES users(discord_id) ON DELETE CASCADE,
+        CREATE TABLE IF NOT EXISTS laddermembers (
+          ladderid INT REFERENCES ladders(ladderid) ON DELETE CASCADE,
+          discordid VARCHAR(32) REFERENCES users(discordid) ON DELETE CASCADE,
           position INT,
-          is_active BOOLEAN DEFAULT TRUE,
-          joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-          PRIMARY KEY (ladder_id, discord_id)
+          isactive BOOLEAN DEFAULT TRUE,
+          joinedat TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          PRIMARY KEY (ladderid, discordid)
         );
 
-        CREATE TABLE IF NOT EXISTS active_challenges (
-          ladder_id INT REFERENCES ladders(ladder_id) ON DELETE CASCADE,
-          challenger_id VARCHAR(32) REFERENCES users(discord_id) ON DELETE CASCADE,
-          defender_id VARCHAR(32) REFERENCES users(discord_id) ON DELETE CASCADE,
+        CREATE TABLE IF NOT EXISTS activechallenges (
+          ladderid INT REFERENCES ladders(ladderid) ON DELETE CASCADE,
+          challengerid VARCHAR(32) REFERENCES users(discordid) ON DELETE CASCADE,
+          defenderid VARCHAR(32) REFERENCES users(discordid) ON DELETE CASCADE,
           status VARCHAR(20) DEFAULT 'pending',
-          created_at BIGINT,
-          PRIMARY KEY (ladder_id, challenger_id)
+          createdat BIGINT,
+          PRIMARY KEY (ladderid, challengerid)
         );
       `);
 			console.log("✅ Database tables initialized successfully.");

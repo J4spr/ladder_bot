@@ -19,9 +19,9 @@ module.exports = {
 		const defenderId = interaction.user.id;
 
 		try {
-			// 1. Get ladder_id
+			// 1. Get ladderid
 			const ladderRes = await db.query(
-				"SELECT ladder_id FROM ladders WHERE ladder_name = $1 AND is_active = TRUE",
+				"SELECT ladderid FROM ladders WHERE laddername = $1 AND isactive = TRUE",
 				[ladderName],
 			);
 
@@ -31,12 +31,12 @@ module.exports = {
 				});
 			}
 
-			const ladderId = ladderRes.rows[0].ladder_id;
+			const ladderId = ladderRes.rows[0].ladderid;
 
 			// 2. Fetch pending challenge where interaction.user is the defender
 			const challengeRes = await db.query(
-				`SELECT challenger_id FROM active_challenges 
-				 WHERE ladder_id = $1 AND defender_id = $2 AND status = 'pending'`,
+				`SELECT challengerid FROM activechallenges 
+				 WHERE ladderid = $1 AND defenderid = $2 AND status = 'pending'`,
 				[ladderId, defenderId],
 			);
 
@@ -46,13 +46,13 @@ module.exports = {
 				});
 			}
 
-			const challengerId = challengeRes.rows[0].challenger_id;
+			const challengerId = challengeRes.rows[0].challengerid;
 
 			// 3. Update status to 'accepted'
 			await db.query(
-				`UPDATE active_challenges 
+				`UPDATE activechallenges 
 				 SET status = 'accepted' 
-				 WHERE ladder_id = $1 AND challenger_id = $2 AND defender_id = $3`,
+				 WHERE ladderid = $1 AND challengerid = $2 AND defenderid = $3`,
 				[ladderId, challengerId, defenderId],
 			);
 

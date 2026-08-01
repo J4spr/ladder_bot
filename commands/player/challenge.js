@@ -40,7 +40,7 @@ module.exports = {
 		try {
 			// 1. Fetch ladder info
 			const ladderRes = await db.query(
-				"SELECT ladder_id, challenge_count FROM ladders WHERE ladder_name = $1 AND is_active = TRUE",
+				"SELECT ladderid, challengecount FROM ladders WHERE laddername = $1 AND isactive = TRUE",
 				[ladderName],
 			);
 
@@ -50,12 +50,12 @@ module.exports = {
 				});
 			}
 
-			const { ladder_id: ladderId, challenge_count: maxRange } =
+			const { ladderid: ladderId, challengecount: maxRange } =
 				ladderRes.rows[0];
 
 			// 2. Fetch Challenger's position
 			const challengerRes = await db.query(
-				"SELECT position FROM ladder_members WHERE ladder_id = $1 AND discord_id = $2 AND is_active = TRUE",
+				"SELECT position FROM laddermembers WHERE ladderid = $1 AND discordid = $2 AND isactive = TRUE",
 				[ladderId, challengerId],
 			);
 
@@ -69,7 +69,7 @@ module.exports = {
 
 			// 3. Fetch Defender's position
 			const defenderRes = await db.query(
-				"SELECT position FROM ladder_members WHERE ladder_id = $1 AND discord_id = $2 AND is_active = TRUE",
+				"SELECT position FROM laddermembers WHERE ladderid = $1 AND discordid = $2 AND isactive = TRUE",
 				[ladderId, defenderUser.id],
 			);
 
@@ -97,10 +97,10 @@ module.exports = {
 
 			// 5. Create challenge record
 			await db.query(
-				`INSERT INTO active_challenges (ladder_id, challenger_id, defender_id, status, created_at)
+				`INSERT INTO activechallenges (ladderid, challengerid, defenderid, status, createdat)
 				 VALUES ($1, $2, $3, 'pending', $4)
-				 ON CONFLICT (ladder_id, challenger_id) 
-				 DO UPDATE SET defender_id = EXCLUDED.defender_id, status = 'pending', created_at = EXCLUDED.created_at`,
+				 ON CONFLICT (ladderid, challengerid) 
+				 DO UPDATE SET defenderid = EXCLUDED.defenderid, status = 'pending', createdat = EXCLUDED.createdat`,
 				[ladderId, challengerId, defenderUser.id, Date.now()],
 			);
 
@@ -133,7 +133,6 @@ module.exports = {
 			});
 
 			collector.on("collect", async (btnInteraction) => {
-				// 🚫 Security check: block anyone who isn't the defender
 				if (btnInteraction.user.id !== defenderUser.id) {
 					return btnInteraction.reply({
 						content:
@@ -145,15 +144,13 @@ module.exports = {
 				await btnInteraction.deferUpdate();
 
 				if (btnInteraction.customId === "btn_accept_challenge") {
-					// Update DB to accepted
 					await db.query(
-						`UPDATE active_challenges 
+						`UPDATE activechallenges 
 						 SET status = 'accepted' 
-						 WHERE ladder_id = $1 AND challenger_id = $2 AND defender_id = $3`,
+						 WHERE ladderid = $1 AND challengerid = $2 AND defenderid = $3`,
 						[ladderId, challengerId, defenderUser.id],
 					);
 
-					// Disable buttons and update message
 					acceptBtn.setDisabled(true);
 					declineBtn.setDisabled(true);
 
@@ -166,10 +163,9 @@ module.exports = {
 				} else if (
 					btnInteraction.customId === "btn_decline_challenge"
 				) {
-					// Delete challenge from DB
 					await db.query(
-						`DELETE FROM active_challenges 
-						 WHERE ladder_id = $1 AND challenger_id = $2 AND defender_id = $3`,
+						`DELETE FROM activechallenges 
+						 WHERE ladderid = $1 AND challengerid = $2 AND defenderid = $3`,
 						[ladderId, challengerId, defenderUser.id],
 					);
 
@@ -185,7 +181,6 @@ module.exports = {
 				}
 			});
 
-			// Disable buttons automatically if time expires
 			collector.on("end", async (collected, reason) => {
 				if (reason === "time") {
 					acceptBtn.setDisabled(true);

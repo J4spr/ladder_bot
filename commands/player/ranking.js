@@ -20,7 +20,7 @@ module.exports = {
 
 		try {
 			const ladderRes = await db.query(
-				"SELECT ladder_id, ladder_count FROM ladders WHERE ladder_name = $1 AND is_active = TRUE",
+				"SELECT ladderid, laddercount FROM ladders WHERE laddername = $1 AND isactive = TRUE",
 				[ladderName],
 			);
 
@@ -30,14 +30,14 @@ module.exports = {
 				});
 			}
 
-			const { ladder_id: ladderId, ladder_count: maxCapacity } =
+			const { ladderid: ladderId, laddercount: maxCapacity } =
 				ladderRes.rows[0];
 
 			const membersRes = await db.query(
-				`SELECT lm.position, lm.discord_id, u.nickname 
-				 FROM ladder_members lm
-				 JOIN users u ON lm.discord_id = u.discord_id
-				 WHERE lm.ladder_id = $1 AND lm.is_active = TRUE
+				`SELECT lm.position, lm.discordid, u.nickname 
+				 FROM laddermembers lm
+				 JOIN users u ON lm.discordid = u.discordid
+				 WHERE lm.ladderid = $1 AND lm.isactive = TRUE
 				 ORDER BY lm.position ASC`,
 				[ladderId],
 			);
@@ -52,7 +52,7 @@ module.exports = {
 			let userCurrentRank = "Not Ranked";
 
 			membersRes.rows.forEach((member) => {
-				const isCurrentUser = member.discord_id === currentUserId;
+				const isCurrentUser = member.discordid === currentUserId;
 				const rankFormatted = `#${member.position}`.padEnd(4, " ");
 
 				if (isCurrentUser) {

@@ -1,21 +1,21 @@
-const { SlashCommandBuilder } = require('discord.js');
-const db = require('../../db.js');
+const { SlashCommandBuilder } = require("discord.js");
+const db = require("../../db.js");
 
 module.exports = {
 	data: new SlashCommandBuilder()
-		.setName('join')
-		.setDescription('Join a ladder as a new player')
+		.setName("join")
+		.setDescription("Join a ladder as a new player")
 		.addStringOption((option) =>
 			option
-				.setName('ladder_name')
-				.setDescription('Enter the ladder name here')
+				.setName("ladder_name")
+				.setDescription("Enter the ladder name here")
 				.setRequired(true),
 		),
 
 	async execute(interaction) {
 		await interaction.deferReply();
 
-		const ladder_name = interaction.options.getString('ladder_name');
+		const ladder_name = interaction.options.getString("ladder_name");
 		const discord_id = interaction.user.id;
 		const username =
 			interaction.user.globalName || interaction.user.username;
@@ -23,7 +23,7 @@ module.exports = {
 		try {
 			// Fetch ladder info
 			const ladderRes = await db.query(
-				'SELECT ladder_id, ladder_count FROM ladders WHERE ladder_name = $1 AND is_active = TRUE',
+				"SELECT ladderid, laddercount FROM ladders WHERE laddername = $1 AND isactive = TRUE",
 				[ladder_name],
 			);
 
@@ -33,50 +33,49 @@ module.exports = {
 				});
 			}
 
-			const { ladder_id, ladder_count } = ladderRes.rows[0];
+			const { ladderid, laddercount } = ladderRes.rows[0];
 
 			// Ensure user entry exists using `nickname` column
 			await db.query(
-				`INSERT INTO users (discord_id, nickname, ladder_id)
+				`INSERT INTO users (discordid, nickname, ladderid)
 				 VALUES ($1, $2, $3)
-				 ON CONFLICT (discord_id) 
-				 DO UPDATE SET nickname = EXCLUDED.nickname, ladder_id = EXCLUDED.ladder_id`,
-				[discord_id, username, ladder_id],
+				 ON CONFLICT (discordid) 
+				 DO UPDATE SET nickname = EXCLUDED.nickname, ladderid = EXCLUDED.ladderid`,
+				[discord_id, username, ladderid],
 			);
 
 			// Count current active members in ladder
 			const countRes = await db.query(
-				'SELECT COUNT(*) FROM ladder_members WHERE ladder_id = $1 AND is_active = TRUE',
-				[ladder_id],
+				"SELECT COUNT(*) FROM laddermembers WHERE ladderid = $1 AND isactive = TRUE",
+				[ladderid],
 			);
 			const currentMemberCount = parseInt(countRes.rows[0].count, 10);
 
-			if (currentMemberCount >= ladder_count) {
+			if (currentMemberCount >= laddercount) {
 				return interaction.editReply({
-					content: `❌ **${ladder_name}** is full! (${currentMemberCount}/${ladder_count})`,
+					content: `❌ **${ladder_name}** is full! (${currentMemberCount}/${laddercount})`,
 				});
 			}
 
 			const nextPosition = currentMemberCount + 1;
 
-			// Insert or Reactivate member in ladder_members
+			// Insert or Reactivate member in laddermembers
 			await db.query(
-				`INSERT INTO ladder_members (ladder_id, discord_id, position, is_active)
+				`INSERT INTO laddermembers (ladderid, discordid, position, isactive)
 				 VALUES ($1, $2, $3, TRUE)
-				 ON CONFLICT (ladder_id, discord_id) 
-				 DO UPDATE SET is_active = TRUE, position = EXCLUDED.position`,
-				[ladder_id, discord_id, nextPosition],
+				 ON CONFLICT (ladderid, discordid) 
+				 DO UPDATE SET isactive = TRUE, position = EXCLUDED.position`,
+				[ladderid, discord_id, nextPosition],
 			);
 
 			await interaction.editReply({
 				content: `✅ You joined **${ladder_name}** at spot **#${nextPosition}**!`,
 			});
-		}
-		catch (error) {
-			console.error('Error running /join:', error);
+		} catch (error) {
+			console.error("Error running /join:", error);
 			await interaction.editReply({
 				content:
-					'❌ An error occurred while attempting to join the ladder.',
+					"❌ An error occurred while attempting to join the ladder.",
 			});
 		}
 	},

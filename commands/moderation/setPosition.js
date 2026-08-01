@@ -35,7 +35,7 @@ module.exports = {
 
 		try {
 			const ladderRes = await db.query(
-				"SELECT ladder_id FROM ladders WHERE ladder_name = $1 AND is_active = TRUE",
+				"SELECT ladderid FROM ladders WHERE laddername = $1 AND isactive = TRUE",
 				[ladderName],
 			);
 
@@ -45,17 +45,17 @@ module.exports = {
 				);
 			}
 
-			const ladderId = ladderRes.rows[0].ladder_id;
+			const ladderId = ladderRes.rows[0].ladderid;
 
 			// Fetch existing player at that target position (if any)
 			const targetRes = await db.query(
-				"SELECT discord_id, position FROM ladder_members WHERE ladder_id = $1 AND position = $2 AND is_active = TRUE",
+				"SELECT discordid, position FROM laddermembers WHERE ladderid = $1 AND position = $2 AND isactive = TRUE",
 				[ladderId, newPos],
 			);
 
 			// Fetch moving player's current position
 			const moverRes = await db.query(
-				"SELECT position FROM ladder_members WHERE ladder_id = $1 AND discord_id = $2 AND is_active = TRUE",
+				"SELECT position FROM laddermembers WHERE ladderid = $1 AND discordid = $2 AND isactive = TRUE",
 				[ladderId, targetUser.id],
 			);
 
@@ -70,18 +70,18 @@ module.exports = {
 			// If another player occupies that exact spot, swap them
 			if (
 				targetRes.rows.length > 0 &&
-				targetRes.rows[0].discord_id !== targetUser.id
+				targetRes.rows[0].discordid !== targetUser.id
 			) {
-				const otherPlayerId = targetRes.rows[0].discord_id;
+				const otherPlayerId = targetRes.rows[0].discordid;
 				await db.query(
-					"UPDATE ladder_members SET position = $1 WHERE ladder_id = $2 AND discord_id = $3",
+					"UPDATE laddermembers SET position = $1 WHERE ladderid = $2 AND discordid = $3",
 					[oldPos, ladderId, otherPlayerId],
 				);
 			}
 
 			// Move target user to new spot
 			await db.query(
-				"UPDATE ladder_members SET position = $1 WHERE ladder_id = $2 AND discord_id = $3",
+				"UPDATE laddermembers SET position = $1 WHERE ladderid = $2 AND discordid = $3",
 				[newPos, ladderId, targetUser.id],
 			);
 

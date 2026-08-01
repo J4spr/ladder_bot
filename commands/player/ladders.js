@@ -34,7 +34,7 @@ module.exports = {
 			let descriptionText = "";
 			ladderRes.rows.forEach((row) => {
 				descriptionText += `🏆 **${row.laddername}**\n`;
-				descriptionText += `└ 👥 **Players:** ${row.active_players}/${row.laddercount} | ⚔️ **Challenge Range:** ${row.challengecount} spots\n\n`;
+				descriptionText += `└ 👥 **Players:** ${row.activeplayers}/${row.laddercount} | ⚔️ **Challenge Range:** ${row.challengecount} spots\n\n`;
 			});
 
 			const embed = new EmbedBuilder()

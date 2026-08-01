@@ -23,6 +23,7 @@ services:
 
     bot:
         image: ghcr.io/j4spr/ladder_bot:main
+        # build: .
         container_name: fom_discord_bot
         restart: unless-stopped
         depends_on:
